@@ -47,7 +47,10 @@ _TRAINING_FIELDS = {
 def _int_or_none(value: Any) -> int | None:
     if value is None or isinstance(value, bool):
         return None
-    return int(value)
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _bool(value: Any) -> bool:

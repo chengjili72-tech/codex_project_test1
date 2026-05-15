@@ -28,3 +28,16 @@ def test_mermaid_renders_pipeline_nodes():
     assert "flowchart LR" in mermaid
     assert "PP0[PP0: Layers 0-11]" in mermaid
     assert "PP1[PP1: Layers 12-23]" in mermaid
+from megatron_viz.renderers.html import render_html
+
+
+def test_html_renderer_contains_browser_visualization_for_complex_script():
+    config = normalize_args(parse_script_file("tests/fixtures/deepseek_moe_npu.sh"))
+    html = render_html(config)
+
+    assert "<!doctype html>" in html
+    assert "Megatron-LM 模型结构可视化" in html
+    assert "PP Stage 0" in html
+    assert "MLA / Multi-Latent Attention" in html
+    assert "MoE Experts" in html
+    assert "window.MEGATRON_CONFIG" in html

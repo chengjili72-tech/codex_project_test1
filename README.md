@@ -1,6 +1,6 @@
 # Megatron Visualizer MVP
 
-`megatron-viz` is an early Megatron-LM visualization tool. The current MVP follows **方案 A**: it parses a copied launch command or a simple Megatron-LM shell launch script, normalizes the key model and parallelism arguments, and emits Markdown, Mermaid, or JSON.
+`megatron-viz` is an early Megatron-LM visualization tool. The current MVP follows **方案 A**: it parses a copied launch command or a simple Megatron-LM shell launch script, normalizes the key model and parallelism arguments, and emits Markdown, Mermaid, JSON, or standalone browser HTML.
 
 The project is intentionally structured around a normalized intermediate representation so later work can add a richer frontend, Megatron log parsing, resolved-args integration, and per-layer tensor examples without rewriting the parser or renderers.
 
@@ -17,6 +17,7 @@ The project is intentionally structured around a normalized intermediate represe
   - Markdown report
   - Mermaid pipeline diagram
   - normalized JSON
+  - standalone browser HTML visualization
 - Run basic diagnostics for TP, PP, hidden/head divisibility, world size, and MoE expert splits.
 - Emit lightweight tensor-shape examples as a foundation for the future per-layer tensor walkthrough.
 
@@ -66,6 +67,15 @@ megatron-viz from-script tests/fixtures/train_gpt.sh --format mermaid
 megatron-viz from-script tests/fixtures/train_gpt.sh --format json --out config.json
 ```
 
+### Browser visualization
+
+```bash
+megatron-viz from-script tests/fixtures/deepseek_moe_npu.sh --format html --out report.html
+python -m webbrowser report.html
+```
+
+The HTML file is standalone and can be opened directly in a browser. It contains metric cards, logical model structure, a pipeline SVG visualization, diagnostics, tensor-shape examples, and embedded normalized JSON for future frontend work.
+
 ## Report sections
 
 The Markdown report contains:
@@ -96,6 +106,7 @@ Important modules:
 - `megatron_viz.ir.normalizer`: converts parsed raw args into the stable IR and infers derived values.
 - `megatron_viz.reports.diagnostics`: validation, pipeline layer ranges, and initial tensor-shape examples.
 - `megatron_viz.renderers.markdown`: Markdown and Mermaid renderers.
+- `megatron_viz.renderers.html`: standalone browser renderer for interactive HTML/SVG visualization.
 - `megatron_viz.cli`: `megatron-viz` command line entrypoint.
 
 ## Roadmap
@@ -129,7 +140,7 @@ This should be generated from the same `MegatronConfig` IR so the future fronten
 ## Limitations
 
 - This MVP statically parses scripts and does not execute Bash.
-- Complex shell variables, sourced files, conditionals, and loops are not resolved.
+- Common scalar variables, arrays, arithmetic such as `WORLD_SIZE=$(($NPUS_PER_NODE*$NNODES))`, and quoted argument blocks are resolved statically. Complex sourced files, conditionals, loops, and command substitutions are not executed.
 - Megatron-LM logs are not parsed yet.
 - Megatron-LM's own argparse defaults are approximated only where explicitly implemented.
 
