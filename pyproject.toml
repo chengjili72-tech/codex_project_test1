@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "megatron-viz"
+version = "0.1.0"
+description = "Generate Markdown, Mermaid, and JSON visualizations from Megatron-LM launch commands."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [{name = "codex_project_test1 contributors"}]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+megatron-viz = "megatron_viz.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["megatron_viz*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
