@@ -1,0 +1,17 @@
+[2026-05-17 00:00:00] using world size: 64, data-parallel-size: 8, tensor-model-parallel size: 2, pipeline-model-parallel size: 4
+num_layers .................................. 16
+hidden_size .................................. 7168
+ffn_hidden_size .............................. 18432
+num_attention_heads .......................... 128
+seq_length ................................... 4096
+vocab_size ................................... 129280
+tensor_model_parallel_size ................... 2
+pipeline_model_parallel_size ................. 4
+expert_model_parallel_size ................... 16
+num_experts .................................. 128
+moe_router_topk .............................. 8
+micro_batch_size ............................. 1
+global_batch_size ............................ 64
+bf16 ......................................... True
+normalization ................................ RMSNorm
+transformer_impl ............................. transformer_engine

@@ -7,10 +7,12 @@ import json
 import sys
 from pathlib import Path
 
+from megatron_viz.inputs.log_parser import parse_log_file
 from megatron_viz.inputs.shell_parser import parse_megatron_args, parse_script_file
 from megatron_viz.ir.normalizer import normalize_args
 from megatron_viz.renderers.html import render_html
 from megatron_viz.renderers.markdown import render_markdown, render_mermaid
+from megatron_viz.server import run_server
 
 
 def _write_output(text: str, out: str | None) -> None:
@@ -50,6 +52,14 @@ def build_parser() -> argparse.ArgumentParser:
     from_script = subparsers.add_parser("from-script", help="Parse a simple Megatron-LM shell launch script.")
     from_script.add_argument("path", help="Path to a launch script.")
     add_common(from_script)
+
+    from_log = subparsers.add_parser("from-log", help="Parse a Megatron-LM training log.")
+    from_log.add_argument("path", help="Path to a training log.")
+    add_common(from_log)
+
+    serve = subparsers.add_parser("serve", help="Start a local upload service for visualization and config comparison.")
+    serve.add_argument("--host", default="127.0.0.1", help="Host interface to bind. Defaults to 127.0.0.1.")
+    serve.add_argument("--port", type=int, default=8765, help="Port to bind. Defaults to 8765.")
     return parser
 
 
@@ -60,6 +70,11 @@ def main(argv: list[str] | None = None) -> int:
         args_dict = parse_megatron_args(parsed.launch_command)
     elif parsed.command == "from-script":
         args_dict = parse_script_file(parsed.path)
+    elif parsed.command == "from-log":
+        args_dict = parse_log_file(parsed.path)
+    elif parsed.command == "serve":
+        run_server(host=parsed.host, port=parsed.port)
+        return 0
     else:
         parser.error(f"unsupported command: {parsed.command}")
     _emit(args_dict, parsed.format, parsed.out)

@@ -18,6 +18,7 @@ The project is intentionally structured around a normalized intermediate represe
   - Mermaid pipeline diagram
   - normalized JSON
   - standalone browser HTML visualization
+  - local upload web service for online visualization and config comparison
 - Run basic diagnostics for TP, PP, hidden/head divisibility, world size, and MoE expert splits.
 - Emit lightweight tensor-shape examples as a foundation for the future per-layer tensor walkthrough.
 
@@ -55,6 +56,12 @@ megatron-viz from-command 'torchrun pretrain_gpt.py \
 megatron-viz from-script tests/fixtures/train_gpt.sh --out report.md
 ```
 
+### From a training log
+
+```bash
+megatron-viz from-log tests/fixtures/megatron_train.log --format html --out log_report.html
+```
+
 ### Mermaid only
 
 ```bash
@@ -75,6 +82,14 @@ python -m webbrowser report.html
 ```
 
 The HTML file is standalone and can be opened directly in a browser. It contains metric cards, logical model structure, a pipeline SVG visualization, diagnostics, tensor-shape examples, and embedded normalized JSON for future frontend work.
+
+### Local upload service
+
+```bash
+megatron-viz serve --host 127.0.0.1 --port 8765
+```
+
+Open `http://127.0.0.1:8765` in a browser. The service lets users upload a Megatron-LM `.sh` launch script or `.log`/`.txt` training log to generate an HTML model visualization. It also supports uploading two files to compare key model, parallelism, and training parameters with highlighted differences.
 
 ## Report sections
 
@@ -107,6 +122,9 @@ Important modules:
 - `megatron_viz.reports.diagnostics`: validation, pipeline layer ranges, and initial tensor-shape examples.
 - `megatron_viz.renderers.markdown`: Markdown and Mermaid renderers.
 - `megatron_viz.renderers.html`: standalone browser renderer for interactive HTML/SVG visualization.
+- `megatron_viz.renderers.compare_html`: standalone side-by-side comparison renderer with highlighted key-parameter differences.
+- `megatron_viz.inputs.log_parser`: log parser for resolved argument lines and embedded launch commands.
+- `megatron_viz.server`: local upload web service for browser-based visualization and comparison.
 - `megatron_viz.cli`: `megatron-viz` command line entrypoint.
 
 ## Roadmap
@@ -141,7 +159,7 @@ This should be generated from the same `MegatronConfig` IR so the future fronten
 
 - This MVP statically parses scripts and does not execute Bash.
 - Common scalar variables, arrays, arithmetic such as `WORLD_SIZE=$(($NPUS_PER_NODE*$NNODES))`, and quoted argument blocks are resolved statically. Complex sourced files, conditionals, loops, and command substitutions are not executed.
-- Megatron-LM logs are not parsed yet.
+- Megatron-LM logs are supported for common resolved-argument lines and embedded launch commands; highly customized log formats may still need parser extensions.
 - Megatron-LM's own argparse defaults are approximated only where explicitly implemented.
 
 For highest accuracy in a later version, add a resolved-args JSON path that reuses Megatron-LM's own argument parser before visualization.
